@@ -221,7 +221,7 @@ function addUri(username, uri, dlDir, callback) {
     aria2.addUri([uri], { dir: `${constants.ARIA_DOWNLOAD_LOCATION}/${dlDir}` })
         .then((gid) => {
         aria2.tellStatus(gid, ["totalLength", "infoHash", "numSeeders", "connections", "files"], (err, resp) => {
-            callback(null, { gid: gid, infoHash: resp.infoHash, fileName: resp.files[0].path.substring(10) });
+            callback(null, { gid: gid, infoHash: resp.infoHash ? resp.infoHash : 'No Hash', fileName: resp.files[0].path.substring(10) });
         });
         // callback(null, {gid : gid});
     })

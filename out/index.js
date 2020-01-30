@@ -644,6 +644,7 @@ function ariaOnDownloadComplete(gid, retry) {
                     else if (isMetadata) {
                         console.log(`${gid} Changed to ${newGid}`);
                         ariaTools.changeGid(gid, newGid, false, (err, res) => {
+                            console.log(res.body);
                             console.log(`${gid} Changed in DB ${newGid}`);
                         });
                         dlManager.changeDownloadGid(gid, newGid);
