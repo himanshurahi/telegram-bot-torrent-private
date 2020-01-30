@@ -9,7 +9,7 @@ module.exports = Object.freeze({
     ARIA_PORT: 8210,
     GDRIVE_PARENT_DIR_ID: '1Y4ht074Qy7-UKNEZrizhp4C4fSReEBjD',
     SUDO_USERS: [711100725],
-    AUTHORIZED_CHATS: [711100725],
+    AUTHORIZED_CHATS: [-1001396180922],
     STATUS_UPDATE_INTERVAL_MS: 12000,
     API_LINK: "http://torrent-drive-api.herokuapp.com",
     DRIVE_FILE_PRIVATE: {

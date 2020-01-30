@@ -9,7 +9,7 @@ module.exports = Object.freeze({
   ARIA_PORT: 8210, // Port for aria2c RPC server, if you change this here, make sure to update aria.sh as well -leave as it is
   GDRIVE_PARENT_DIR_ID:  '1Y4ht074Qy7-UKNEZrizhp4C4fSReEBjD', // for directorty eg. https://drive.google.com/drive/folders/1p7pHhSh2yboWePmo53DnVr3xkAYiojP9 use 1p7pHhSh2yboWePmo53DnVr3xkAYiojP9
   SUDO_USERS: [711100725],	// Telegram user IDs. These users can use the bot in any chat. required, get it using https://t.me/YourTGid_Bot
-  AUTHORIZED_CHATS: [711100725],	// Telegram chat IDs. Anyone in these chats can use the bot. Add https://t.me/YourTGid_Bot to Group and click /id
+  AUTHORIZED_CHATS: [-1001396180922],	// Telegram chat IDs. Anyone in these chats can use the bot. Add https://t.me/YourTGid_Bot to Group and click /id
   STATUS_UPDATE_INTERVAL_MS: 12000, // A smaller number will update faster, but might cause rate limiting -leave as it is
   API_LINK : "http://torrent-drive-api.herokuapp.com", //added By Himanshu Rahi
   DRIVE_FILE_PRIVATE: {

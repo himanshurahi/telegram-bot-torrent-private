@@ -23,6 +23,7 @@ initAria2();
 bot.on("polling_error", msg => console.error(msg.message));
 bot.on('message', (msg) => {
     const chatId = msg.chat.id;
+    console.log(chatId);
     // start: RegExp;
     // readonly mirrorTar: RegExp;
     // readonly mirror: RegExp;
