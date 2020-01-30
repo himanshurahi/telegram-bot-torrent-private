@@ -317,9 +317,11 @@ function deleteTorrent(gid, callback) {
     });
 }
 exports.deleteTorrent = deleteTorrent;
-function DBSaveDownloadComplete(gid, gdlink, indexlink, fileSize, callback) {
+function DBSaveDownloadComplete(gid, fileName, infoHash, gdlink, indexlink, fileSize, callback) {
     request.post({ uri: `${constants.API_LINK}/savetorrent/GDLinkdownloadcomplete`, json: true, body: {
             gid: gid,
+            fileName: fileName,
+            infoHash: infoHash,
             fileSize: fileSize,
             GDLink: gdlink,
             IndexLink: indexlink

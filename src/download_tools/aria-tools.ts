@@ -17,7 +17,6 @@ const ariaOptions = {
   path: '/jsonrpc'
 };
 const aria2 = new Aria2(ariaOptions);
-
 export function openWebsocket(callback: (err: string) => void): void {
   aria2.open()
     .then(() => {
@@ -337,9 +336,11 @@ export function deleteTorrent(gid:any, callback : (err:any, res:any) => void){
   })
 }
 
-export function DBSaveDownloadComplete(gid:any, gdlink:any, indexlink:any, fileSize:any, callback : (err:any, res:any) => void){
+export function DBSaveDownloadComplete(gid:any, fileName : any, infoHash:any ,gdlink:any, indexlink:any, fileSize:any, callback : (err:any, res:any) => void){
   request.post({uri : `${constants.API_LINK}/savetorrent/GDLinkdownloadcomplete`, json : true, body : {
     gid : gid,
+    fileName : fileName,
+    infoHash : infoHash,
     fileSize : fileSize,
     GDLink : gdlink,
     IndexLink : indexlink

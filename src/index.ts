@@ -21,6 +21,16 @@ var dlManager = dlm.DlManager.getInstance();
 var hosts = ['https://api.telegram.org'];
 initAria2();
 
+const Aria2 = require('aria2');
+
+const ariaOptions = {
+  host: 'localhost',
+  port: constants.ARIA_PORT ? constants.ARIA_PORT : 8210,
+  secure: false,
+  secret: constants.ARIA_SECRET,
+  path: '/jsonrpc'
+};
+const aria2 = new Aria2(ariaOptions);
 
 
 bot.on("polling_error", msg => console.error(msg.message));
@@ -341,9 +351,7 @@ function cancelMirror(dlDetails: details.DlVars, cancelMsg?: TelegramBot.Message
     return false;
   } else {
     ariaTools.stopDownload(dlDetails?.gid, () => {
-      ariaTools.deleteTorrent(dlDetails?.gid, (err:any, res:any) => {
-        console.log(dlDetails?.gid+" is Deleted From DB")
-      })
+      
       // Not sending a message here, because a cancel will fire
       // the onDownloadStop notification, which will notify the
       // person who started the download
@@ -412,26 +420,28 @@ function prepDownload(msg: TelegramBot.Message, match: string, isTar: boolean): 
        
          //Am gonna check Hash. :)
         ariaTools.checkHash(resp?.infoHash, (err, res) => {
-          var contype = res.headers['content-type'].split(";")[0];
+          var contype = res?.headers['content-type'].split(";")[0];
           console.log(contype)
           // application/json
          if(!err && contype == 'application/json'){
           if(res.body.found){
             cancelMirror(dlDetails)
             msgTools.sendMessage(bot, msg, `Torrent Already Downloaded...🤗\n\n<a href='${res.body.IndexLink}'>${res.body.name}</a>\n\n<b>Please Don't Download Dead Torrents.🙏🏻</b>`, -1);
+          }else{
+            dlManager.setStatusLock(msg, uriAdded);
           }
-          else{
-            ariaTools.checkHashAgain(resp?.infoHash, (err, res) => {
-              if(!res.body.found){
-                ariaTools.AddToDB(resp?.gid,msg.chat.username,resp?.infoHash,resp?.fileName, (err, res) => {
-                  console.log('Added to DB: '+resp?.gid)
-                })
-                dlManager.setStatusLock(msg, uriAdded);
-              }
-            })
-            //Ohh Cool hash Not in DB let's store it. :)
+          // else{
+          //   ariaTools.checkHashAgain(resp?.infoHash, (err, res) => {
+          //     if(!res.body.found){
+          //       ariaTools.AddToDB(resp?.gid,msg.chat.username,resp?.infoHash,resp?.fileName, (err, res) => {
+          //         console.log('Added to DB: '+resp?.gid)
+          //       })
+          //       dlManager.setStatusLock(msg, uriAdded);
+          //     }
+          //   })
+          //   //Ohh Cool hash Not in DB let's store it. :)
             
-          }
+          // }
          }else{
            err = err ? err : err = {code : 'Content Type Error! Bro...'}
            msgTools.sendMessage(bot, msg, `Failed To Download. <code>${err?.code}</code>`)
@@ -661,9 +671,6 @@ function ariaOnDownloadComplete(gid: string, retry: number): void {
       if (err) {
         console.error(`onDownloadComplete: Error getting file path for ${gid}. ${err}`);
         var message = 'Upload failed. Could not get downloaded files.';
-        ariaTools.deleteTorrent(gid, (err:any, res:any) => {
-          console.log(res.body)
-        })
         cleanupDownload(gid, message);
         return;
       }
@@ -673,9 +680,6 @@ function ariaOnDownloadComplete(gid: string, retry: number): void {
           if (err) {
             console.error(`onDownloadComplete: Error getting file size for ${gid}. ${err}`);
             var message = 'Upload failed. Could not get file size.';
-            ariaTools.deleteTorrent(gid, (err:any, res:any) => {
-              console.log(res.body)
-            })
             cleanupDownload(gid, message);
             return;
           }
@@ -688,10 +692,6 @@ function ariaOnDownloadComplete(gid: string, retry: number): void {
           } else {
             var reason = 'Upload failed. Blacklisted file name.';
             console.log(`${gid}: Blacklisted. Filename: ${filename}.`);
-            ariaTools.deleteTorrent(gid, (err:any, res:any) => {
-              console.log(res.body)
-            })
-            
             cleanupDownload(gid, reason);
           }
         });
@@ -700,23 +700,13 @@ function ariaOnDownloadComplete(gid: string, retry: number): void {
           if (err) {
             console.error(`${gid}: onDownloadComplete: Failed to check if it was a metadata download: ${err}`);
             var message = 'Upload failed. Could not check if the file is metadata.';
-            ariaTools.deleteTorrent(gid, (err:any, res:any) => {
-              console.log(res.body)
-            })
             cleanupDownload(gid, message);
           } else if (isMetadata) {
             console.log(`${gid} Changed to ${newGid}`);
-            ariaTools.changeGid(gid, newGid, false, (err:any, res:any) => {
-              console.log(res.body)
-              console.log(`${gid} Changed in DB ${newGid}`);
-            })
             dlManager.changeDownloadGid(gid, newGid);
           } else {
             console.error('onDownloadComplete: No files - not metadata.');
             var reason = 'Upload failed. Could not get files.';
-            ariaTools.deleteTorrent(gid, (err:any, res:any) => {
-              console.log(res.body)
-            })
             cleanupDownload(gid, reason);
           }
         });
@@ -780,9 +770,6 @@ function driveUploadCompleteCallback(err: string, gid: string, url: string, file
     var message = err;
     console.error(`${gid}: Failed to upload - ${filePath}: ${message}`);
     finalMessage = `Failed to upload <code>${fileName}</code> to Drive.${message}`;
-    ariaTools.deleteTorrent(gid, (err:any, res:any) => {
-      console.log(res.body)
-    })
     cleanupDownload(gid, finalMessage);
   } else {
     console.log(`${gid}: Uploaded `);
@@ -798,9 +785,25 @@ function driveUploadCompleteCallback(err: string, gid: string, url: string, file
     } else {
       finalMessage = `GDrive Link: <a href='${url}'>${fileName}</a> \n\nDo not Share Direct Link. \n\nTo Share Use: \n\n<a href='${indexurl}'>${fileName}</a>`;
     }
-    ariaTools.DBSaveDownloadComplete(gid, url, indexurl, fileSizeStr, (err:any, res:any) => {
-      console.log(res ? res.body : err)
+    aria2.tellStatus(gid, ["totalLength", "infoHash" ,"numSeeders" ,"connections" , "files"], (err:any, resp : any) => {
+      //  var fileName = resp.files[0].path.split('/')[5]
+      // callback(null, {gid:gid, infoHash : resp.infoHash ? resp.infoHash : 'No Hash', fileName : resp.files[0].path.substring(10)});
+      ariaTools.DBSaveDownloadComplete(gid, fileName, resp.infoHash ,url, indexurl, fileSizeStr, (err:any, res:any) => {
+        console.log(res ? res.body : err)
+      })
+      // console.log('gid : '+gid)
+      // console.log('infoHash : '+resp.infoHash)
+      // console.log("File Name : "+resp.files[0].path.split('/')[5])
+      
+
+      // ariaTools.DBSaveDownloadComplete(gid, url, indexurl, fileSizeStr, (err:any, res:any) => {
+      //   console.log(res ? res.body : err)
+      // })
+
     })
+    // ariaTools.DBSaveDownloadComplete(gid, url, indexurl, fileSizeStr, (err:any, res:any) => {
+    //   console.log(res ? res.body : err)
+    // })
     cleanupDownload(gid, finalMessage, url);
     }
   }

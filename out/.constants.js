@@ -11,7 +11,7 @@ module.exports = Object.freeze({
     SUDO_USERS: [711100725],
     AUTHORIZED_CHATS: [-1001396180922],
     STATUS_UPDATE_INTERVAL_MS: 12000,
-    API_LINK: "http://torrent-drive-api.herokuapp.com",
+    API_LINK: "https://torrent-drive-api.herokuapp.com",
     DRIVE_FILE_PRIVATE: {
         ENABLED: false,
         EMAILS: ['1@gmail.com', '2@gmail.com']
