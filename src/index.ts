@@ -333,28 +333,28 @@ function sendCancelledMessages(): void {
 function mycancelMirror(){}
 
 function cancelMirror(dlDetails: details.DlVars, cancelMsg?: TelegramBot.Message): boolean {
-  if (dlDetails.isUploading) {
+  if (dlDetails?.isUploading) {
     if (cancelMsg) {
       msgTools.sendMessage(bot, cancelMsg, 'Upload in progress. Cannot cancel.');
     }
     return false;
   } else {
-    ariaTools.stopDownload(dlDetails.gid, () => {
-      ariaTools.deleteTorrent(dlDetails.gid, (err:any, res:any) => {
-        console.log(dlDetails.gid+" is Deleted From DB")
+    ariaTools.stopDownload(dlDetails?.gid, () => {
+      ariaTools.deleteTorrent(dlDetails?.gid, (err:any, res:any) => {
+        console.log(dlDetails?.gid+" is Deleted From DB")
       })
       // Not sending a message here, because a cancel will fire
       // the onDownloadStop notification, which will notify the
       // person who started the download
 
-      if (cancelMsg && dlDetails.tgChatId !== cancelMsg.chat.id) {
+      if (cancelMsg && dlDetails?.tgChatId !== cancelMsg?.chat.id) {
         // Notify if this is not the chat the download started in
         msgTools.sendMessage(bot, cancelMsg, 'The download was canceled.');
       }
-      if (!dlDetails.isDownloading) {
+      if (!dlDetails?.isDownloading) {
         // onDownloadStopped does not fire for downloads that haven't started yet
         // So calling this here
-        ariaOnDownloadStop(dlDetails.gid, 1);
+        ariaOnDownloadStop(dlDetails?.gid, 1);
       }
     });
     return true;
@@ -413,8 +413,8 @@ function prepDownload(msg: TelegramBot.Message, match: string, isTar: boolean): 
         ariaTools.checkHash(resp?.infoHash, (err, res) => {
          if(!err){
           if(res.body.found){
-            msgTools.sendMessage(bot, msg, `Torrent Already Downloaded...🤗\n\n<a href='${res.body.IndexLink}'>${res.body.name}</a>\n\n<b>Please Don't Download Dead Torrents.🙏🏻</b>`, -1);
             cancelMirror(dlDetails)
+            msgTools.sendMessage(bot, msg, `Torrent Already Downloaded...🤗\n\n<a href='${res.body.IndexLink}'>${res.body.name}</a>\n\n<b>Please Don't Download Dead Torrents.🙏🏻</b>`, -1);
           }else{
             ariaTools.checkHashAgain(resp?.infoHash, (err, res) => {
               if(!res.body.found){
@@ -636,6 +636,9 @@ function ariaOnDownloadStop(gid: string, retry: number): void {
     if (dlDetails.isDownloadAllowed === 0) {
       message += ' Blacklisted file name.';
     }
+    ariaTools.deleteTorrent(gid , (err, res) => {
+      console.log('onStopped Deleted '+gid)
+    })
     cleanupDownload(gid, message);
   } else if (retry <= 8) {
     // OnDownloadStop probably got called before prepDownload's startDownload callback. Unlikely. Retry.

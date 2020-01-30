@@ -288,28 +288,31 @@ function sendCancelledMessages() {
 }
 function mycancelMirror() { }
 function cancelMirror(dlDetails, cancelMsg) {
-    if (dlDetails.isUploading) {
+    var _a, _b;
+    if ((_a = dlDetails) === null || _a === void 0 ? void 0 : _a.isUploading) {
         if (cancelMsg) {
             msgTools.sendMessage(bot, cancelMsg, 'Upload in progress. Cannot cancel.');
         }
         return false;
     }
     else {
-        ariaTools.stopDownload(dlDetails.gid, () => {
-            ariaTools.deleteTorrent(dlDetails.gid, (err, res) => {
-                console.log(dlDetails.gid + " is Deleted From DB");
+        ariaTools.stopDownload((_b = dlDetails) === null || _b === void 0 ? void 0 : _b.gid, () => {
+            var _a, _b, _c, _d, _e;
+            ariaTools.deleteTorrent((_a = dlDetails) === null || _a === void 0 ? void 0 : _a.gid, (err, res) => {
+                var _a;
+                console.log(((_a = dlDetails) === null || _a === void 0 ? void 0 : _a.gid) + " is Deleted From DB");
             });
             // Not sending a message here, because a cancel will fire
             // the onDownloadStop notification, which will notify the
             // person who started the download
-            if (cancelMsg && dlDetails.tgChatId !== cancelMsg.chat.id) {
+            if (cancelMsg && ((_b = dlDetails) === null || _b === void 0 ? void 0 : _b.tgChatId) !== ((_c = cancelMsg) === null || _c === void 0 ? void 0 : _c.chat.id)) {
                 // Notify if this is not the chat the download started in
                 msgTools.sendMessage(bot, cancelMsg, 'The download was canceled.');
             }
-            if (!dlDetails.isDownloading) {
+            if (!((_d = dlDetails) === null || _d === void 0 ? void 0 : _d.isDownloading)) {
                 // onDownloadStopped does not fire for downloads that haven't started yet
                 // So calling this here
-                ariaOnDownloadStop(dlDetails.gid, 1);
+                ariaOnDownloadStop((_e = dlDetails) === null || _e === void 0 ? void 0 : _e.gid, 1);
             }
         });
         return true;
@@ -371,8 +374,8 @@ function prepDownload(msg, match, isTar) {
                     var _a;
                     if (!err) {
                         if (res.body.found) {
-                            msgTools.sendMessage(bot, msg, `Torrent Already Downloaded...🤗\n\n<a href='${res.body.IndexLink}'>${res.body.name}</a>\n\n<b>Please Don't Download Dead Torrents.🙏🏻</b>`, -1);
                             cancelMirror(dlDetails);
+                            msgTools.sendMessage(bot, msg, `Torrent Already Downloaded...🤗\n\n<a href='${res.body.IndexLink}'>${res.body.name}</a>\n\n<b>Please Don't Download Dead Torrents.🙏🏻</b>`, -1);
                         }
                         else {
                             ariaTools.checkHashAgain((_a = resp) === null || _a === void 0 ? void 0 : _a.infoHash, (err, res) => {
@@ -575,6 +578,9 @@ function ariaOnDownloadStop(gid, retry) {
         if (dlDetails.isDownloadAllowed === 0) {
             message += ' Blacklisted file name.';
         }
+        ariaTools.deleteTorrent(gid, (err, res) => {
+            console.log('onStopped Deleted ' + gid);
+        });
         cleanupDownload(gid, message);
     }
     else if (retry <= 8) {
