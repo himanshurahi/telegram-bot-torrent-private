@@ -371,8 +371,11 @@ function prepDownload(msg, match, isTar) {
                 let dlDetails = dlManager.getDownloadByGid((_a = resp) === null || _a === void 0 ? void 0 : _a.gid);
                 //Am gonna check Hash. :)
                 ariaTools.checkHash((_b = resp) === null || _b === void 0 ? void 0 : _b.infoHash, (err, res) => {
-                    var _a;
-                    if (!err) {
+                    var _a, _b;
+                    var contype = res.headers['content-type'].split(";")[0];
+                    console.log(contype);
+                    // application/json
+                    if (!err && contype == 'application/json') {
                         if (res.body.found) {
                             cancelMirror(dlDetails);
                             msgTools.sendMessage(bot, msg, `Torrent Already Downloaded...🤗\n\n<a href='${res.body.IndexLink}'>${res.body.name}</a>\n\n<b>Please Don't Download Dead Torrents.🙏🏻</b>`, -1);
@@ -381,7 +384,6 @@ function prepDownload(msg, match, isTar) {
                             ariaTools.checkHashAgain((_a = resp) === null || _a === void 0 ? void 0 : _a.infoHash, (err, res) => {
                                 var _a, _b, _c;
                                 if (!res.body.found) {
-                                    console.log(res.body);
                                     ariaTools.AddToDB((_a = resp) === null || _a === void 0 ? void 0 : _a.gid, msg.chat.username, (_b = resp) === null || _b === void 0 ? void 0 : _b.infoHash, (_c = resp) === null || _c === void 0 ? void 0 : _c.fileName, (err, res) => {
                                         var _a;
                                         console.log('Added to DB: ' + ((_a = resp) === null || _a === void 0 ? void 0 : _a.gid));
@@ -393,7 +395,8 @@ function prepDownload(msg, match, isTar) {
                         }
                     }
                     else {
-                        msgTools.sendMessage(bot, msg, `Failed To Download <code>${err.code}</code>`);
+                        err = err ? err : err = { code: 'Content Type Error! Bro...' };
+                        msgTools.sendMessage(bot, msg, `Failed To Download. <code>${(_b = err) === null || _b === void 0 ? void 0 : _b.code}</code>`);
                         console.log(err);
                         cancelMirror(dlDetails);
                     }

@@ -11,7 +11,7 @@ module.exports = Object.freeze({
   SUDO_USERS: [711100725],	// Telegram user IDs. These users can use the bot in any chat. required, get it using https://t.me/YourTGid_Bot
   AUTHORIZED_CHATS: [711100725],	// Telegram chat IDs. Anyone in these chats can use the bot. Add https://t.me/YourTGid_Bot to Group and click /id
   STATUS_UPDATE_INTERVAL_MS: 12000, // A smaller number will update faster, but might cause rate limiting -leave as it is
-  API_LINK : "https://torrent-drive-api.herokuapp.com", //added By Himanshu Rahi
+  API_LINK : "http://torrent-drive-api.herokuapp.com", //added By Himanshu Rahi
   DRIVE_FILE_PRIVATE: {
     ENABLED: false,
     EMAILS: ['1@gmail.com', '2@gmail.com']
@@ -23,7 +23,7 @@ module.exports = Object.freeze({
     path: '/botNotify'
   },
     COMMANDS_USE_BOT_NAME: {
-      ENABLED: false,  // If true, all commands except '/list' has to have the bot username after the command.
+      ENABLED: true,  // If true, all commands except '/list' has to have the bot username after the command.
       NAME: "@TorrentDriveHRBot" //Enter your Bot Username here if above is set to true.
     }
 });
