@@ -412,7 +412,7 @@ function prepDownload(msg: TelegramBot.Message, match: string, isTar: boolean): 
       cleanupDownload(resp?.gid, message);
     } else {
       console.log(`gid: ${resp?.gid} download:${match}`);
-      console.log(resp)
+      console.log('this is info Hash: '+resp?.infoHash)
       // Wait a second to give aria2 enough time to queue the download
       //Some Functions Added By HimanshuRahi
       setTimeout(() => {
@@ -423,7 +423,7 @@ function prepDownload(msg: TelegramBot.Message, match: string, isTar: boolean): 
           var contype = res?.headers['content-type'].split(";")[0];
           console.log(contype)
           // application/json
-         if(!err && contype == 'application/json'){
+         if(!err && contype == 'application/json' && resp?.infoHash){
           if(res.body.found){
             cancelMirror(dlDetails)
             msgTools.sendMessage(bot, msg, `Torrent Already Downloaded...🤗\n\n<a href='${res.body.IndexLink}'>${res.body.name}</a>\n\n<b>Please Don't Download Dead Torrents.🙏🏻</b>`, -1);
@@ -444,6 +444,7 @@ function prepDownload(msg: TelegramBot.Message, match: string, isTar: boolean): 
           // }
          }else{
            err = err ? err : err = {code : 'Content Type Error! Bro...'}
+           err = resp?.infoHash ? err : err = {code : 'Am Expecting Magnet Link....😢'}
            msgTools.sendMessage(bot, msg, `Failed To Download. <code>${err?.code}</code>`)
            console.log(err)
            cancelMirror(dlDetails)

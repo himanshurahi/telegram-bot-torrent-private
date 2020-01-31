@@ -359,7 +359,7 @@ function handleDisallowedFilename(dlDetails, filename) {
 function prepDownload(msg, match, isTar) {
     var dlDir = uuid();
     ariaTools.addUri(msg.chat.username, match, dlDir, (err, resp) => {
-        var _a, _b, _c;
+        var _a, _b, _c, _d;
         dlManager.addDownload((_a = resp) === null || _a === void 0 ? void 0 : _a.gid, dlDir, msg, isTar);
         if (err) {
             var message = `Failed to start the download. ${err.message}`;
@@ -369,7 +369,7 @@ function prepDownload(msg, match, isTar) {
         }
         else {
             console.log(`gid: ${(_c = resp) === null || _c === void 0 ? void 0 : _c.gid} download:${match}`);
-            console.log(resp);
+            console.log('this is info Hash: ' + ((_d = resp) === null || _d === void 0 ? void 0 : _d.infoHash));
             // Wait a second to give aria2 enough time to queue the download
             //Some Functions Added By HimanshuRahi
             setTimeout(() => {
@@ -377,11 +377,11 @@ function prepDownload(msg, match, isTar) {
                 let dlDetails = dlManager.getDownloadByGid((_a = resp) === null || _a === void 0 ? void 0 : _a.gid);
                 //Am gonna check Hash. :)
                 ariaTools.checkHash((_b = resp) === null || _b === void 0 ? void 0 : _b.infoHash, (err, res) => {
-                    var _a, _b;
+                    var _a, _b, _c, _d;
                     var contype = (_a = res) === null || _a === void 0 ? void 0 : _a.headers['content-type'].split(";")[0];
                     console.log(contype);
                     // application/json
-                    if (!err && contype == 'application/json') {
+                    if (!err && contype == 'application/json' && ((_b = resp) === null || _b === void 0 ? void 0 : _b.infoHash)) {
                         if (res.body.found) {
                             cancelMirror(dlDetails);
                             msgTools.sendMessage(bot, msg, `Torrent Already Downloaded...🤗\n\n<a href='${res.body.IndexLink}'>${res.body.name}</a>\n\n<b>Please Don't Download Dead Torrents.🙏🏻</b>`, -1);
@@ -403,7 +403,8 @@ function prepDownload(msg, match, isTar) {
                     }
                     else {
                         err = err ? err : err = { code: 'Content Type Error! Bro...' };
-                        msgTools.sendMessage(bot, msg, `Failed To Download. <code>${(_b = err) === null || _b === void 0 ? void 0 : _b.code}</code>`);
+                        err = ((_c = resp) === null || _c === void 0 ? void 0 : _c.infoHash) ? err : err = { code: 'Am Expecting Magnet Link....😢' };
+                        msgTools.sendMessage(bot, msg, `Failed To Download. <code>${(_d = err) === null || _d === void 0 ? void 0 : _d.code}</code>`);
                         console.log(err);
                         cancelMirror(dlDetails);
                     }

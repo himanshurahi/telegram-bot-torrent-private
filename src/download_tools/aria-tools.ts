@@ -226,7 +226,7 @@ export function addUri(username : any,uri: string, dlDir: string, callback: (err
       
       aria2.tellStatus(gid, ["totalLength", "infoHash" ,"numSeeders" ,"connections" , "files"], (err:any, resp : any) => {
        
-        callback(null, {gid:gid, infoHash : resp.infoHash ? resp.infoHash : 'No Hash', fileName : resp.files[0].path.substring(10)});
+        callback(null, {gid:gid, infoHash : resp.infoHash, fileName : resp.files[0].path.substring(10)});
       })
 
       // callback(null, {gid : gid});
