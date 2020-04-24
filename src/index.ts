@@ -64,13 +64,13 @@ bot.on('message', (msg) => {
     msgTools.sendMessage(bot, msg, `
     /help: To get this message
 
-/mirror [download_url][magnet_link]: Start mirroring the link to google drive
+/mirror@{BotName} [download_url][magnet_link]: Start mirroring the link to google drive
 
-/mirrortar [download_url][magnet_link]: start mirroring and upload the archived (.tar) version of the download
+/mirrortar@{BotName} [download_url][magnet_link]: start mirroring and upload the archived (.tar) version of the download
 
-/cancelmirror : Reply to the message by which the download was initiated and that download will be cancelled
+/cancelmirror@{BotName} : Reply to the message by which the download was initiated and that download will be cancelled
 
-/mirrorstatus: Shows a status of all the downloads
+/mirrorstatus@{BotName}: Shows a status of all the downloads
 
 /list [search term]: Searches the search term in the Google drive, if found replies with the link
 
@@ -82,22 +82,14 @@ bot.on('message', (msg) => {
     exec(`df --output="size,used,avail" -h "${constants.ARIA_DOWNLOAD_LOCATION_ROOT}" | tail -n1`,
       (err, res) => {
         var disk = res.trim().split(/\s+/);
-         exec(`lscpu | grep "Model name:" | sed -r 's/Model name:\s{1,}//g'`, (err, res) => {
-          var cpu = res.trim().split(/\s+/).join(" ")
-          msgTools.sendMessage(bot, msg, `Total space: ${disk[0]}B\nUsed: ${disk[1]}B\nAvailable: ${disk[2]}B\n${cpu}\nUser: Himanshu Rahi`);
+         exec(`lscpu | grep "Model name:" | sed -r 's/Model name:\s{1,}//g' && uptime -p`, (err, res) => {
+          var cpu = res.trim().split(/\s+/).join(" ").split("up")
+          msgTools.sendMessage(bot, msg, `Total space: ${disk[0]}B\nUsed: ${disk[1]}B\nAvailable: ${disk[2]}B\n${cpu[0]}\nBot Uptime : <code>${cpu[1].trim().split(/\s+/).join(" ")}</code>\nUser: Himanshu Rahi`);
         })
        
       }
     );
   }
-
-
- 
-
-
-
-
-
 
 
   // if(msg.text.split(" ")[1]){
@@ -106,16 +98,7 @@ bot.on('message', (msg) => {
   //     msgTools.sendMessage(bot, msg, "Please Provice URL");
   //   }
   // }
-    
-  
-
-  
-  
-
-
-  
-  
-  // send a message to the chat acknowledging receipt of their message
+   // send a message to the chat acknowledging receipt of their message
   // bot.sendMessage(chatId, 'Received your message');
   // msgTools.sendMessage(bot, msg, 'Received your message');
 });
@@ -407,7 +390,6 @@ function prepDownload(msg: TelegramBot.Message, match: string, isTar: boolean): 
     dlManager.addDownload(resp?.gid, dlDir, msg, isTar);
     if (err) {
       var message = `Failed to start the download. ${err.message}`;
-      console.log('failed Runninh..')
       console.error(message);
       cleanupDownload(resp?.gid, message);
     } else {
@@ -425,8 +407,16 @@ function prepDownload(msg: TelegramBot.Message, match: string, isTar: boolean): 
           // application/json
          if(!err && contype == 'application/json' && resp?.infoHash){
           if(res.body.found){
+            console.log(res.body)
             cancelMirror(dlDetails)
-            msgTools.sendMessage(bot, msg, `Torrent Already Downloaded...🤗\n\n<a href='${res.body.IndexLink}'>${res.body.name}</a>\n\n<b>Please Don't Download Dead Torrents.🙏🏻</b>`, -1);
+            //copied Logic LOL
+            if(res.body.GDLink.indexOf("/folders/") > -1){
+              var rawurl = constants.INDEX_DOMAIN + res.body.name + "/";
+            }else{
+              var rawurl = constants.INDEX_DOMAIN + res.body.name ;
+            }
+            // GDrive Link: <a href='${url}'>${fileName}</a> (${fileSizeStr}) \n\nDo not Share Direct Link. \n\nTo Share Use: \n\n<a href='${indexurl}'>${fileName}</a>`;
+            msgTools.sendMessage(bot, msg, `Torrent Already Downloaded...🤗\n\nGDrive Link: <a href='${res.body.GDLink}'>${res.body.name}</a> (${res.body.fileSize}) \n\nDo not Share Direct Link. \n\nTo Share Use: \n\n<a href='${rawurl}'>${res.body.name}</a>\n\n<b>Please Don't Download Dead Torrents.🙏🏻</b>`, -1);
           }else{
             dlManager.setStatusLock(msg, uriAdded);
           }
@@ -730,7 +720,7 @@ function ariaOnDownloadError(gid: string, retry: number): void {
         message = 'Failed to download.';
         console.error(`${gid}: failed. Failed to get the error message. ${err}`);
       } else {
-        message = `Failed to download hahah. ${res}`;
+        message = `Failed to download. ${res}`;
         console.error(`${gid}: failed. ${res}`);
       }
       ariaTools.deleteTorrent(gid, (err:any, res:any) => {

@@ -2,7 +2,7 @@ module.exports = Object.freeze({
     TOKEN: '1036199133:AAFFzcQGcnCqDiYFz8YYz6UcXBitjY2a4nw',
     ARIA_SECRET: 'bhadoo',
     ARIA_DOWNLOAD_LOCATION: '/app/downloads/',
-    INDEX_DOMAIN: 'https://drive.himanshurahi.tk/uploadbot/',
+    INDEX_DOMAIN: 'https://drive.himanshurahi.workers.dev/uploadbot/',
     ARIA_DOWNLOAD_LOCATION_ROOT: '/',
     ARIA_FILTERED_DOMAINS: [],
     ARIA_FILTERED_FILENAMES: [],
