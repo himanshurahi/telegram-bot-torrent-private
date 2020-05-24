@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DBSaveDownloadComplete = exports.deleteTorrent = exports.changeGid = exports.checkHashAgain = exports.checkHash = exports.AddToDB = exports.addUri = exports.stopDownload = exports.uploadFile = exports.getFileSize = exports.isDownloadMetadata = exports.getError = exports.getStatus = exports.getAriaFilePath = exports.setOnDownloadError = exports.setOnDownloadComplete = exports.setOnDownloadStop = exports.setOnDownloadStart = exports.openWebsocket = void 0;
 const downloadUtils = require("./utils");
 const drive = require("../fs-walk");
 const Aria2 = require('aria2');

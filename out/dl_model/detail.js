@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DlVars = void 0;
 class DlVars {
     constructor(gid, msg, isTar, downloadDir) {
         this.isTar = isTar;

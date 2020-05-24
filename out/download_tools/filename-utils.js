@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.isFilenameAllowed = exports.getActualDownloadPath = exports.getFileNameFromPath = exports.findAriaFilePath = void 0;
 const constants = require("../.constants");
 const TYPE_METADATA = 'Metadata';
 /**

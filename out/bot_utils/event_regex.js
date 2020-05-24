@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.EventRegex = void 0;
 const constants = require("../.constants");
 const regexps = require("./reg_exps");
 class EventRegex {

@@ -79,6 +79,7 @@ bot.on('message', (msg) => {
 
 
   if(/\/stats@TorrentDriveHRBot$/.test(msg.text) || /\/stats$/.test(msg.text)){
+    
     exec(`df --output="size,used,avail" -h "${constants.ARIA_DOWNLOAD_LOCATION_ROOT}" | tail -n1`,
       (err, res) => {
         var disk = res.trim().split(/\s+/);
@@ -134,7 +135,7 @@ setEventCallback(eventRegex.commandsRegex.ping, eventRegex.commandsRegexNoName.p
     msgTools.sendUnauthorizedMessage(bot, msg);
   }
   else {
-    ping(hosts).then(function (delta: any) {
+    ping(hosts, 1).then(function (delta: any) {
       console.log(msg)
         msgTools.sendMessage(bot, msg, 'Ping time was ' + String(delta) + ' ms.');
         console.log('Starting ping test. Ping time was ' + String(delta) + ' ms');
@@ -499,21 +500,29 @@ function sendStatusMessage(msg: TelegramBot.Message, keepForever?: boolean): Pro
   return new Promise(resolve => {
     downloadUtils.getStatusMessage()
       .then(res => {
-        if (keepForever) {
-          msgTools.sendMessage(bot, msg, res.message, -1, message => {
-            dlManager.addStatus(message, res.message);
-            resolve();
-          });
-        } else {
-          var ttl = 60000;
-          msgTools.sendMessage(bot, msg, res.message, ttl, message => {
-            dlManager.addStatus(message, res.message);
-            setTimeout(() => {
-              dlManager.deleteStatus(msg.chat.id);
-            }, ttl);
-            resolve();
-          }, true);
-        }
+
+        getCompDetail((err: any, resp:any) => {
+          res.message += resp
+          if (keepForever) {
+            msgTools.sendMessage(bot, msg, res.message, -1, message => {
+              dlManager.addStatus(message, res.message);
+              resolve();
+            });
+          } else {
+            var ttl = 60000;
+            msgTools.sendMessage(bot, msg, res.message, ttl, message => {
+              dlManager.addStatus(message, res.message);
+              setTimeout(() => {
+                dlManager.deleteStatus(msg.chat.id);
+              }, ttl);
+              resolve();
+            }, true);
+          }
+        })
+
+
+        
+        
       })
       .catch(resolve);
   });
@@ -525,6 +534,7 @@ function sendStatusMessage(msg: TelegramBot.Message, keepForever?: boolean): Pro
 function updateAllStatus(): void {
   downloadUtils.getStatusMessage()
     .then(res => {
+      // getCompDetail((err:any, resp:any) => {})
       var staleStatusReply = 'ETELEGRAM: 400 Bad Request: message to edit not found';
 
       if (res.singleStatuses) {
@@ -538,15 +548,19 @@ function updateAllStatus(): void {
       dlManager.forEachStatus(status => {
         // Do not update the status if the message remains the same.
         // Otherwise, the Telegram API starts complaining.
-        if (res.message !== status.lastStatus) {
-          msgTools.editMessage(bot, status.msg, res.message, staleStatusReply)
-            .catch(err => {
-              if (err.message === staleStatusReply) {
-                dlManager.deleteStatus(status.msg.chat.id);
-              }
-            });
-          status.lastStatus = res.message;
-        }
+        getCompDetail((err : any, resp:any) => {
+          if (res.message !== status.lastStatus) {
+            res.message += resp
+            msgTools.editMessage(bot, status.msg, res.message, staleStatusReply)
+              .catch(err => {
+                if (err.message === staleStatusReply) {
+                  dlManager.deleteStatus(status.msg.chat.id);
+                }
+              });
+            status.lastStatus = res.message;
+          }
+        })
+
       });
 
       if (res.totalDownloadCount === 0) {
@@ -563,6 +577,20 @@ function deleteAllStatus(): void {
     msgTools.deleteMsg(bot, statusMessage.msg, 10000);
     dlManager.deleteStatus(statusMessage.msg.chat.id);
   });
+}
+
+function getCompDetail(callback : (err:any, res:any) => void){
+  exec(
+    `free -m | awk 'NR==2{printf " %s/%sMB (%.2f%%)\\n", $3,$2,$3*100/$2 }' &&
+    df -h | awk '$NF=="/"{printf "%d/%dGB (%s)\\n", $3,$2,$5}' &&
+    top -bn1 | grep load | awk '{printf "%.2f\\n", $(NF-2)}' `,
+    (err, resp) => {
+      var res1 = resp.split("\n")
+      var finalstatus = `\n\n<b>Memory Usage</b> : <code>${res1[0].substring(1)}</code>\n<b>Disk Usage</b> : <code>${res1[1]}</code>\n<b>CPU Load</b> : <code>${res1[2]}</code>`
+      // console.log(finalstatus)
+      callback(null, finalstatus)
+    }
+  )
 }
 
 /**

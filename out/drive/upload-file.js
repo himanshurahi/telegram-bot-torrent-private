@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.uploadGoogleDriveFile = void 0;
 const parseRange = require('http-range-parse');
 const request = require("request");
 const fs = require("fs");

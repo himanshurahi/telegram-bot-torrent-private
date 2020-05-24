@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.isDownloadAllowed = exports.formatSize = exports.generateStatusMessage = exports.getStatusMessage = exports.deleteDownloadedFile = void 0;
 const fs = require("fs-extra");
 const filenameUtils = require("./filename-utils");
 const constants = require("../.constants");

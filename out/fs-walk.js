@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.uploadRecursive = void 0;
 const fs = require("fs");
 const mime = require("mime-types");
 const gdrive = require("./drive/drive-upload");

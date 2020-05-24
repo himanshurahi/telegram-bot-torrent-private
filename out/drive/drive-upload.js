@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getSharableLink = exports.uploadFileOrFolder = void 0;
 const driveAuth = require("./drive-auth");
 const driveFile = require("./upload-file");
 const utils = require("./drive-utils");

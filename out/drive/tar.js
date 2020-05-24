@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.archive = void 0;
 const tar = require("tar");
 const fs = require("fs");
 function archive(srcPath, destName, callback) {

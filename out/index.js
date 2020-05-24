@@ -109,7 +109,7 @@ setEventCallback(eventRegex.commandsRegex.ping, eventRegex.commandsRegexNoName.p
         msgTools.sendUnauthorizedMessage(bot, msg);
     }
     else {
-        ping(hosts).then(function (delta) {
+        ping(hosts, 1).then(function (delta) {
             console.log(msg);
             msgTools.sendMessage(bot, msg, 'Ping time was ' + String(delta) + ' ms.');
             console.log('Starting ping test. Ping time was ' + String(delta) + ' ms');
@@ -298,27 +298,25 @@ function sendCancelledMessages() {
 }
 function mycancelMirror() { }
 function cancelMirror(dlDetails, cancelMsg) {
-    var _a, _b;
-    if ((_a = dlDetails) === null || _a === void 0 ? void 0 : _a.isUploading) {
+    if (dlDetails === null || dlDetails === void 0 ? void 0 : dlDetails.isUploading) {
         if (cancelMsg) {
             msgTools.sendMessage(bot, cancelMsg, 'Upload in progress. Cannot cancel.');
         }
         return false;
     }
     else {
-        ariaTools.stopDownload((_b = dlDetails) === null || _b === void 0 ? void 0 : _b.gid, () => {
+        ariaTools.stopDownload(dlDetails === null || dlDetails === void 0 ? void 0 : dlDetails.gid, () => {
             // Not sending a message here, because a cancel will fire
             // the onDownloadStop notification, which will notify the
             // person who started the download
-            var _a, _b, _c, _d;
-            if (cancelMsg && ((_a = dlDetails) === null || _a === void 0 ? void 0 : _a.tgChatId) !== ((_b = cancelMsg) === null || _b === void 0 ? void 0 : _b.chat.id)) {
+            if (cancelMsg && (dlDetails === null || dlDetails === void 0 ? void 0 : dlDetails.tgChatId) !== (cancelMsg === null || cancelMsg === void 0 ? void 0 : cancelMsg.chat.id)) {
                 // Notify if this is not the chat the download started in
                 msgTools.sendMessage(bot, cancelMsg, 'The download was canceled.');
             }
-            if (!((_c = dlDetails) === null || _c === void 0 ? void 0 : _c.isDownloading)) {
+            if (!(dlDetails === null || dlDetails === void 0 ? void 0 : dlDetails.isDownloading)) {
                 // onDownloadStopped does not fire for downloads that haven't started yet
                 // So calling this here
-                ariaOnDownloadStop((_d = dlDetails) === null || _d === void 0 ? void 0 : _d.gid, 1);
+                ariaOnDownloadStop(dlDetails === null || dlDetails === void 0 ? void 0 : dlDetails.gid, 1);
             }
         });
         return true;
@@ -359,28 +357,25 @@ function handleDisallowedFilename(dlDetails, filename) {
 function prepDownload(msg, match, isTar) {
     var dlDir = uuid();
     ariaTools.addUri(msg.chat.username, match, dlDir, (err, resp) => {
-        var _a, _b, _c, _d;
-        dlManager.addDownload((_a = resp) === null || _a === void 0 ? void 0 : _a.gid, dlDir, msg, isTar);
+        dlManager.addDownload(resp === null || resp === void 0 ? void 0 : resp.gid, dlDir, msg, isTar);
         if (err) {
             var message = `Failed to start the download. ${err.message}`;
             console.error(message);
-            cleanupDownload((_b = resp) === null || _b === void 0 ? void 0 : _b.gid, message);
+            cleanupDownload(resp === null || resp === void 0 ? void 0 : resp.gid, message);
         }
         else {
-            console.log(`gid: ${(_c = resp) === null || _c === void 0 ? void 0 : _c.gid} download:${match}`);
-            console.log('this is info Hash: ' + ((_d = resp) === null || _d === void 0 ? void 0 : _d.infoHash));
+            console.log(`gid: ${resp === null || resp === void 0 ? void 0 : resp.gid} download:${match}`);
+            console.log('this is info Hash: ' + (resp === null || resp === void 0 ? void 0 : resp.infoHash));
             // Wait a second to give aria2 enough time to queue the download
             //Some Functions Added By HimanshuRahi
             setTimeout(() => {
-                var _a, _b;
-                let dlDetails = dlManager.getDownloadByGid((_a = resp) === null || _a === void 0 ? void 0 : _a.gid);
+                let dlDetails = dlManager.getDownloadByGid(resp === null || resp === void 0 ? void 0 : resp.gid);
                 //Am gonna check Hash. :)
-                ariaTools.checkHash((_b = resp) === null || _b === void 0 ? void 0 : _b.infoHash, (err, res) => {
-                    var _a, _b, _c, _d;
-                    var contype = (_a = res) === null || _a === void 0 ? void 0 : _a.headers['content-type'].split(";")[0];
+                ariaTools.checkHash(resp === null || resp === void 0 ? void 0 : resp.infoHash, (err, res) => {
+                    var contype = res === null || res === void 0 ? void 0 : res.headers['content-type'].split(";")[0];
                     console.log(contype);
                     // application/json
-                    if (!err && contype == 'application/json' && ((_b = resp) === null || _b === void 0 ? void 0 : _b.infoHash)) {
+                    if (!err && contype == 'application/json' && (resp === null || resp === void 0 ? void 0 : resp.infoHash)) {
                         if (res.body.found) {
                             console.log(res.body);
                             cancelMirror(dlDetails);
@@ -411,8 +406,8 @@ function prepDownload(msg, match, isTar) {
                     }
                     else {
                         err = err ? err : err = { code: 'Content Type Error! Bro...' };
-                        err = ((_c = resp) === null || _c === void 0 ? void 0 : _c.infoHash) ? err : err = { code: 'Am Expecting Magnet Link....😢' };
-                        msgTools.sendMessage(bot, msg, `Failed To Download. <code>${(_d = err) === null || _d === void 0 ? void 0 : _d.code}</code>`);
+                        err = (resp === null || resp === void 0 ? void 0 : resp.infoHash) ? err : err = { code: 'Am Expecting Magnet Link....😢' };
+                        msgTools.sendMessage(bot, msg, `Failed To Download. <code>${err === null || err === void 0 ? void 0 : err.code}</code>`);
                         console.log(err);
                         cancelMirror(dlDetails);
                     }
@@ -461,22 +456,25 @@ function sendStatusMessage(msg, keepForever) {
     return new Promise(resolve => {
         downloadUtils.getStatusMessage()
             .then(res => {
-            if (keepForever) {
-                msgTools.sendMessage(bot, msg, res.message, -1, message => {
-                    dlManager.addStatus(message, res.message);
-                    resolve();
-                });
-            }
-            else {
-                var ttl = 60000;
-                msgTools.sendMessage(bot, msg, res.message, ttl, message => {
-                    dlManager.addStatus(message, res.message);
-                    setTimeout(() => {
-                        dlManager.deleteStatus(msg.chat.id);
-                    }, ttl);
-                    resolve();
-                }, true);
-            }
+            getCompDetail((err, resp) => {
+                res.message += resp;
+                if (keepForever) {
+                    msgTools.sendMessage(bot, msg, res.message, -1, message => {
+                        dlManager.addStatus(message, res.message);
+                        resolve();
+                    });
+                }
+                else {
+                    var ttl = 60000;
+                    msgTools.sendMessage(bot, msg, res.message, ttl, message => {
+                        dlManager.addStatus(message, res.message);
+                        setTimeout(() => {
+                            dlManager.deleteStatus(msg.chat.id);
+                        }, ttl);
+                        resolve();
+                    }, true);
+                }
+            });
         })
             .catch(resolve);
     });
@@ -487,6 +485,7 @@ function sendStatusMessage(msg, keepForever) {
 function updateAllStatus() {
     downloadUtils.getStatusMessage()
         .then(res => {
+        // getCompDetail((err:any, resp:any) => {})
         var staleStatusReply = 'ETELEGRAM: 400 Bad Request: message to edit not found';
         if (res.singleStatuses) {
             res.singleStatuses.forEach(status => {
@@ -498,15 +497,18 @@ function updateAllStatus() {
         dlManager.forEachStatus(status => {
             // Do not update the status if the message remains the same.
             // Otherwise, the Telegram API starts complaining.
-            if (res.message !== status.lastStatus) {
-                msgTools.editMessage(bot, status.msg, res.message, staleStatusReply)
-                    .catch(err => {
-                    if (err.message === staleStatusReply) {
-                        dlManager.deleteStatus(status.msg.chat.id);
-                    }
-                });
-                status.lastStatus = res.message;
-            }
+            getCompDetail((err, resp) => {
+                if (res.message !== status.lastStatus) {
+                    res.message += resp;
+                    msgTools.editMessage(bot, status.msg, res.message, staleStatusReply)
+                        .catch(err => {
+                        if (err.message === staleStatusReply) {
+                            dlManager.deleteStatus(status.msg.chat.id);
+                        }
+                    });
+                    status.lastStatus = res.message;
+                }
+            });
         });
         if (res.totalDownloadCount === 0) {
             // No more active or queued downloads, let's stop the status refresh timer
@@ -520,6 +522,16 @@ function deleteAllStatus() {
     dlManager.forEachStatus(statusMessage => {
         msgTools.deleteMsg(bot, statusMessage.msg, 10000);
         dlManager.deleteStatus(statusMessage.msg.chat.id);
+    });
+}
+function getCompDetail(callback) {
+    child_process_1.exec(`free -m | awk 'NR==2{printf " %s/%sMB (%.2f%%)\\n", $3,$2,$3*100/$2 }' &&
+    df -h | awk '$NF=="/"{printf "%d/%dGB (%s)\\n", $3,$2,$5}' &&
+    top -bn1 | grep load | awk '{printf "%.2f\\n", $(NF-2)}' `, (err, resp) => {
+        var res1 = resp.split("\n");
+        var finalstatus = `\n\n<b>Memory Usage</b> : <code>${res1[0].substring(1)}</code>\n<b>Disk Usage</b> : <code>${res1[1]}</code>\n<b>CPU Load</b> : <code>${res1[2]}</code>`;
+        // console.log(finalstatus)
+        callback(null, finalstatus);
     });
 }
 /**
@@ -683,8 +695,7 @@ function ariaOnDownloadError(gid, retry) {
                 console.error(`${gid}: failed. ${res}`);
             }
             ariaTools.deleteTorrent(gid, (err, res) => {
-                var _a;
-                console.log('Deleted :' + ((_a = res) === null || _a === void 0 ? void 0 : _a.body));
+                console.log('Deleted :' + (res === null || res === void 0 ? void 0 : res.body));
             });
             cleanupDownload(gid, message, null, dlDetails);
         });

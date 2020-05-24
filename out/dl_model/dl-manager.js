@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DlManager = void 0;
 const dlDetails = require("./detail");
 class DlManager {
     constructor() {

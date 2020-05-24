@@ -29,7 +29,7 @@
     }
     /**
      * Pings a url.
-     * @param  {String} url
+     * @param  {String[]} url
      * @param  {Number} multiplier - optional, factor to adjust the ping by.  0.3 works well for HTTP servers.
      * @return {Promise} promise that resolves to a ping (ms, float).
      */

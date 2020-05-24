@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getPublicUrlRequestHeaders = exports.getFileLink = void 0;
 function getFileLink(fileId, isFolder) {
     if (isFolder) {
         return 'https://drive.google.com/drive/folders/' + fileId;

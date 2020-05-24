@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.RegExps = void 0;
 class RegExps {
     constructor(commands) {
         this.start = new RegExp(commands[0]);
