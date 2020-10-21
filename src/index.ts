@@ -121,6 +121,11 @@ setEventCallback(eventRegex.commandsRegex.start, eventRegex.commandsRegexNoName.
     // msgTools.sendUnauthorizedMessage(bot, msg);
     msgTools.sendMessage(bot, msg, 'Bot is not usable outside @RahiCloud group', -1);
   } else {
+    console.log('ad function running')
+    ariaTools.AdURL('google.com',(err:any, res:any) => {
+      console.log(res)
+      console.log(err)
+    })
     msgTools.sendMessage(bot, msg,
                          'Welcome to @RahiCloud Group.\n\nPlease Read Pinned Post.',
                          -1);

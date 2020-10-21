@@ -352,3 +352,13 @@ export function DBSaveDownloadComplete(gid:any, fileName : any, infoHash:any ,gd
     }
   })
 }
+
+export function AdURL(url :any, callback : (err:any,res:any) => void){
+  request.get({uri : `http://ouo.io/api/W9dxceA8?s=${url}`},(err:any, res:any) => {
+    if(res){
+     callback(null, res)
+    }else{
+      callback(err, null)
+    }
+  })
+}
